@@ -20,16 +20,18 @@ class Game:
         self.circle_img = pg.image.load(path.join(res_folder, CIRCLE_IMG)).convert_alpha()
         self.car_img = pg.image.load(path.join(res_folder, CAR_IMG)).convert_alpha()
         self.map_data = []
+        # read map file
         with open(path.join(res_folder, MAP_FILE), 'rt') as f:
             for line in f:
                 self.map_data.append(line)
 
     def new(self):
-        # initialize all variables and do all the setup for a new game
         self.all = pg.sprite.LayeredUpdates()
         self.av_move_sprites = pg.sprite.Group()
         self.curb_sprites = pg.sprite.Group()
+        # player color setup
         self.player = Player(self, RED)
+        # convert map data to curb tiles
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
                 if tile == '1':
@@ -77,7 +79,6 @@ class Game:
         pg.display.flip()
 
     def events(self):
-        # catch all events here
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit()
@@ -94,11 +95,11 @@ class Game:
             if event.type == pg.MOUSEMOTION:
                 pos = pg.mouse.get_pos()
                 for am in self.av_move_sprites:
+                    # repaint all circles as light
                     pg.draw.circle(am.image, self.player.lighter_color, (TILESIZE / 2, TILESIZE / 2), 5)
                     if am.rect.collidepoint(pos):
+                        # repaint one hovered over
                         pg.draw.circle(am.image, self.player.color, (TILESIZE / 2, TILESIZE / 2), 5)
-                        # AvailableMoveSprite(self, GREEN, am.x, am.y)
-                        # self.av_move_sprites.remove(am)
 
     def show_start_screen(self):
         pass
@@ -106,7 +107,6 @@ class Game:
     def show_go_screen(self):
         pass
 
-# create the game object
 g = Game()
 g.show_start_screen()
 while True:

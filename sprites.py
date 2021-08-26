@@ -16,6 +16,7 @@ class Velocity():
         self.x = x
         self.y = y
 
+# class for curb (off race) tiles
 class CurbTile(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.curb_sprites, game.all
@@ -31,6 +32,7 @@ class CurbTile(pg.sprite.Sprite):
         self.rect.x = self.x * TILESIZE
         self.rect.y = self.y * TILESIZE
 
+# class for suggested moves
 class AvailableMoveSprite(pg.sprite.Sprite):
     def __init__(self, game, color, x, y):
         self.groups = game.av_move_sprites, game.all
@@ -53,7 +55,7 @@ class AvailableMoveSprite(pg.sprite.Sprite):
         self.color = color
         self.update()
 
-
+# class for drawing circles (not used)
 class Circle(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self._layer = 1
@@ -70,7 +72,7 @@ class Circle(pg.sprite.Sprite):
         self.rect.x = self.x * TILESIZE + self.size[0]
         self.rect.y = self.y * TILESIZE + self.size[1]
 
-
+# player car class
 class Player(pg.sprite.Sprite):
     def __init__(self, game, color, x=0, y=0):
         self._layer = 1
@@ -90,12 +92,13 @@ class Player(pg.sprite.Sprite):
 
     def move(self, new_x=0, new_y=0):
         if self.is_available_move(new_x, new_y):
-            # Circle(self.game, self.x, self.y)
+            # static (non-sprite) objectrs have to be painted inside game class
             self.game.circles.append((self.color, self.x, self.y))
             self.game.lines.append((self.color,
                                     ((self.x + 0.5) * TILESIZE, (self.y + 0.5) * TILESIZE),
                                     ((new_x + 0.5) * TILESIZE, (new_y + 0.5) * TILESIZE), 1))
             for curb in self.game.curb_sprites:
+                # intersection check between all curb tiles and last move line
                 cl = curb.rect.clipline(((self.x + 0.5) * TILESIZE, (self.y + 0.5) * TILESIZE),
                                ((new_x + 0.5) * TILESIZE, (new_y + 0.5) * TILESIZE))
                 if cl:
@@ -109,6 +112,7 @@ class Player(pg.sprite.Sprite):
             self.y = new_y
             self.set_available_moves()
 
+            # check if move ended on a curb tile
             for curb in self.game.curb_sprites:
                 if new_x == curb.x and new_y == curb.y:
                     print("COLLISION ! ! !")
@@ -117,6 +121,7 @@ class Player(pg.sprite.Sprite):
     def update(self):
         self.rect.x = self.x * TILESIZE
         self.rect.y = self.y * TILESIZE
+        # align car model with current speed
         self.image = pg.transform.rotate(self.image_path,
                                          np.angle(complex(self.velocity.x, np.negative(self.velocity.y)), deg=True))
         for a in self.available_sprites:
