@@ -33,6 +33,7 @@ class Game:
         self.player = Player(self, RED)
         # convert map data to curb tiles
         for row, tiles in enumerate(self.map_data):
+            print(row, tiles[:-1])
             for col, tile in enumerate(tiles):
                 if tile == '1':
                     CurbTile(self, col, row)
