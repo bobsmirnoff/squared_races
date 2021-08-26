@@ -81,8 +81,6 @@ class Player(pg.sprite.Sprite):
         self.lighter_color = get_lighter_color(color)
         self.image_path = game.car_img
         self.image = self.image_path
-        self.image.fill(GREEN)
-        self.image.blit(self.image, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
