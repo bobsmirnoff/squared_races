@@ -18,7 +18,8 @@ class Game:
 
     def load_data(self):
         self.circle_img = pg.image.load(path.join(res_folder, CIRCLE_IMG)).convert_alpha()
-        self.car_img = pg.image.load(path.join(res_folder, CAR_IMG)).convert_alpha()
+        self.car_img = pg.transform.scale(pg.image.load(path.join(res_folder, CAR_IMG)).convert_alpha(),
+                                          (TILESIZE, TILESIZE))
         self.map_data = []
         # read map file
         with open(path.join(res_folder, MAP_FILE), 'rt') as f:
@@ -30,10 +31,9 @@ class Game:
         self.av_move_sprites = pg.sprite.Group()
         self.curb_sprites = pg.sprite.Group()
         # player color setup
-        self.player = Player(self, RED)
+        self.player = Player(self, YELLOW)
         # convert map data to curb tiles
         for row, tiles in enumerate(self.map_data):
-            print(row, tiles[:-1])
             for col, tile in enumerate(tiles):
                 if tile == '1':
                     CurbTile(self, col, row)
@@ -65,9 +65,9 @@ class Game:
 
     def draw_grid(self):
         for x in range(0, WIDTH, TILESIZE):
-            pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))
+            pg.draw.line(self.screen, LIGHTGREY2, (x, 0), (x, HEIGHT))
         for y in range(0, HEIGHT, TILESIZE):
-            pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
+            pg.draw.line(self.screen, LIGHTGREY2, (0, y), (WIDTH, y))
 
     def draw(self):
         self.screen.fill(BGCOLOR)

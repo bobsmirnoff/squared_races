@@ -11,6 +11,13 @@ def get_lighter_color(color):
     r, g, b = hls_to_rgb(h, max(min(l * 1.5, 1.0), 0.0), s)
     return int(r * 255), int(g * 255), int(b * 255)
 
+def change_color(image, color):
+    colored_image = pg.Surface(image.get_size())
+    colored_image.fill(color)
+    final_image = image.copy()
+    final_image.blit(colored_image, (0, 0), special_flags=pg.BLEND_MULT)
+    return final_image
+
 class Velocity():
     def __init__(self, x=0, y=0):
         self.x = x
@@ -81,8 +88,8 @@ class Player(pg.sprite.Sprite):
         self.game = game
         self.color = color
         self.lighter_color = get_lighter_color(color)
-        self.image_path = game.car_img
-        self.image = self.image_path
+        self.image_original = change_color(game.car_img, color)
+        self.image = self.image_original
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -122,7 +129,7 @@ class Player(pg.sprite.Sprite):
         self.rect.x = self.x * TILESIZE
         self.rect.y = self.y * TILESIZE
         # align car model with current speed
-        self.image = pg.transform.rotate(self.image_path,
+        self.image = pg.transform.rotate(self.image_original,
                                          np.angle(complex(self.velocity.x, np.negative(self.velocity.y)), deg=True))
         for a in self.available_sprites:
             a.update()
