@@ -11,8 +11,8 @@ YELLOW = (255, 255, 0)
 
 # graphic settings
 TITLE = "Demo"
-WIDTH = 600   # 16 * 64 or 32 * 32 or 64 * 16
-HEIGHT = 600  # 16 * 48 or 32 * 24 or 64 * 12
+WIDTH = 600
+HEIGHT = 600
 FPS = 60
 BGCOLOR = DARKGREY
 TILESIZE = 20
