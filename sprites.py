@@ -8,7 +8,7 @@ def print_crd(x, y):
 
 def get_lighter_color(color):
     h, l, s = rgb_to_hls(color[0] / 255.0, color[1] / 255.0, color[2] / 255.0)
-    r, g, b = hls_to_rgb(h, max(min(l * 1.5, 1.0), 0.0), s)
+    r, g, b = hls_to_rgb(h, max(min(l * 1.65, 1.0), 0.0), s)
     return int(r * 255), int(g * 255), int(b * 255)
 
 def change_color(image, color):
@@ -44,6 +44,7 @@ class AvailableMoveSprite(pg.sprite.Sprite):
     def __init__(self, game, color, x, y):
         self.groups = game.av_move_sprites, game.all
         pg.sprite.Sprite.__init__(self, self.groups)
+        self._layer = 2
         self.game = game
         self.color = color
         self.image = pg.Surface((TILESIZE, TILESIZE), pg.SRCALPHA, 32)
@@ -95,7 +96,7 @@ class Player(pg.sprite.Sprite):
         self.y = y
         self.velocity = Velocity()
         self.available_sprites = []
-        self.set_available_moves()
+        # self.set_available_moves()
 
     def move(self, new_x=0, new_y=0):
         if self.is_available_move(new_x, new_y):
@@ -114,16 +115,19 @@ class Player(pg.sprite.Sprite):
             # print("available moves from ", print_crd(self.x, self.y), "to", print_crd(new_x, new_y))
             # print("is move available:", self.is_available_move(new_x, new_y))
             self.velocity = Velocity(new_x - self.x, new_y - self.y)
-            print("new velocity:", print_crd(self.velocity.x, self.velocity.y))
+            # print("new velocity:", print_crd(self.velocity.x, self.velocity.y))
             self.x = new_x
             self.y = new_y
-            self.set_available_moves()
+            # self.set_available_moves()
 
             # check if move ended on a curb tile
             for curb in self.game.curb_sprites:
                 if new_x == curb.x and new_y == curb.y:
                     print("COLLISION ! ! !")
                     break
+            return True
+        else:
+            return False
 
     def update(self):
         self.rect.x = self.x * TILESIZE
@@ -141,12 +145,10 @@ class Player(pg.sprite.Sprite):
         pot_pos = list(filter(lambda p: p[0] >= 0 and p[1] >= 0, [(self.x + v[0], self.y + v[1]) for v in pot_new_speed]))
         # print("filtered new positions: ", pot_pos)
         self.available_moves = pot_pos
-        for s in self.game.av_move_sprites.sprites():
-            s.kill()
         self.available_sprites = [AvailableMoveSprite(self.game, self.lighter_color, p[0], p[1]) for p in pot_pos]
 
     def is_available_move(self, mov_x, mov_y):
         pot_pos = self.available_moves
         # print("is move available: ", any(mov_x == p[0] and mov_y == p[1] for p in pot_pos))
-        return any(mov_x == p[0] and mov_y == p[1] for p in pot_pos)
+        return any(mov_x == p[0] and mov_y == p[1] for p in pot_pos) and self.game.is_available_move(mov_x, mov_y)
 

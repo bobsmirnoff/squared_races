@@ -1,5 +1,6 @@
 import pygame as pg
 import pygame.gfxdraw
+from queue import Queue
 import sys
 from os import path
 from settings import *
@@ -15,6 +16,8 @@ class Game:
         self.load_data()
         self.lines = []
         self.circles = []
+        self.players = Queue()
+        # self.active_player = None
 
     def load_data(self):
         self.circle_img = pg.image.load(path.join(res_folder, CIRCLE_IMG)).convert_alpha()
@@ -28,10 +31,14 @@ class Game:
 
     def new(self):
         self.all = pg.sprite.LayeredUpdates()
-        self.av_move_sprites = pg.sprite.Group()
+        self.av_move_sprites = pg.sprite.LayeredUpdates()
         self.curb_sprites = pg.sprite.Group()
         # player color setup
-        self.player = Player(self, YELLOW)
+        self.players.put(Player(self, GREEN))
+        self.players.put(Player(self, RED, 22, 8))
+        # self.players.put(Player(self, BLUE, 15, 15))
+        self.active_player = self.players.get()
+        self.active_player.set_available_moves()
         # convert map data to curb tiles
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
@@ -72,11 +79,11 @@ class Game:
     def draw(self):
         self.screen.fill(BGCOLOR)
         self.draw_grid()
-        self.all.draw(self.screen)
         for tpl in self.circles:
             self.draw_circle(tpl)
         for tpl in self.lines:
             self.draw_line(tpl)
+        self.all.draw(self.screen)
         pg.display.flip()
 
     def events(self):
@@ -92,21 +99,36 @@ class Game:
                 new_y = int(pos[1] / TILESIZE)
                 # print("X: ", new_x)
                 # print("Y: ", new_y)
-                self.player.move(new_x, new_y)
+                if self.active_player.move(new_x, new_y):
+                    self.pass_turn()
             if event.type == pg.MOUSEMOTION:
                 pos = pg.mouse.get_pos()
                 for am in self.av_move_sprites:
                     # repaint all circles as light
-                    pg.draw.circle(am.image, self.player.lighter_color, (TILESIZE / 2, TILESIZE / 2), 5)
+                    pg.draw.circle(am.image, self.active_player.lighter_color, (TILESIZE / 2, TILESIZE / 2), 5)
                     if am.rect.collidepoint(pos):
                         # repaint one hovered over
-                        pg.draw.circle(am.image, self.player.color, (TILESIZE / 2, TILESIZE / 2), 5)
+                        pg.draw.circle(am.image, self.active_player.color, (TILESIZE / 2, TILESIZE / 2), 5)
 
     def show_start_screen(self):
         pass
 
     def show_go_screen(self):
         pass
+
+    def pass_turn(self):
+        for s in self.av_move_sprites.sprites():
+            s.kill()
+        self.players.put(self.active_player)
+        self.active_player = self.players.get()
+        self.active_player.set_available_moves()
+
+    def is_available_move(self, mov_x, mov_y):
+        for p in self.players.queue:
+            if p.x == mov_x and p.y == mov_y:
+                return False
+        return True
+
 
 g = Game()
 g.show_start_screen()
