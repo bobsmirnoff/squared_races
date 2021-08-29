@@ -9,7 +9,7 @@ from sprites import *
 class Game:
     def __init__(self):
         pg.init()
-        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
+        self.screen = pg.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         pg.key.set_repeat(500, 100)
@@ -18,6 +18,8 @@ class Game:
         self.circles = []
         self.players = Queue()
         # self.active_player = None
+
+        self.game_area = pygame.Surface((MAP_WIDTH + 1, MAP_HEIGHT + 1))
 
     def load_data(self):
         self.circle_img = pg.image.load(path.join(res_folder, CIRCLE_IMG)).convert_alpha()
@@ -44,7 +46,7 @@ class Game:
             for col, tile in enumerate(tiles):
                 if tile == '1':
                     CurbTile(self, col, row)
-        self.curb_sprites.draw(self.screen)
+        self.curb_sprites.draw(self.game_area)
         pg.display.flip()
 
     def run(self):
@@ -64,26 +66,32 @@ class Game:
         self.all.update()
 
     def draw_line(self, tpl):
-        pg.draw.line(self.screen, tpl[0], tpl[1], tpl[2], tpl[3])
+        pg.draw.line(self.game_area, tpl[0], tpl[1], tpl[2], tpl[3])
 
     def draw_circle(self, tpl):
         darker_color = tuple(int(t * 0.6) for t in tpl[0])
-        pg.draw.circle(self.screen, darker_color, ((tpl[1] + 0.5) * TILESIZE, (tpl[2] + 0.5) * TILESIZE), 5)
+        pg.draw.circle(self.game_area, darker_color, ((tpl[1] + 0.5) * TILESIZE, (tpl[2] + 0.5) * TILESIZE), 5)
 
     def draw_grid(self):
-        for x in range(0, WIDTH, TILESIZE):
-            pg.draw.line(self.screen, LIGHTGREY2, (x, 0), (x, HEIGHT))
-        for y in range(0, HEIGHT, TILESIZE):
-            pg.draw.line(self.screen, LIGHTGREY2, (0, y), (WIDTH, y))
+        for x in range(TILESIZE, MAP_WIDTH, TILESIZE):
+            pg.draw.line(self.game_area, LIGHTGREY2, (x, 0), (x, MAP_HEIGHT))
+        for y in range(TILESIZE, MAP_HEIGHT, TILESIZE):
+            pg.draw.line(self.game_area, LIGHTGREY2, (0, y), (MAP_WIDTH, y))
+        pg.draw.line(self.game_area, BLACK, (0, 0), (0, MAP_HEIGHT))
+        pg.draw.line(self.game_area, BLACK, (0, 0), (MAP_WIDTH, 0))
+        pg.draw.line(self.game_area, BLACK, (0, MAP_HEIGHT), (MAP_WIDTH, MAP_HEIGHT))
+        pg.draw.line(self.game_area, BLACK, (MAP_WIDTH, 0), (MAP_WIDTH, MAP_HEIGHT))
 
     def draw(self):
         self.screen.fill(BGCOLOR)
+        self.game_area.fill(LIGHTGREY)
         self.draw_grid()
         for tpl in self.circles:
             self.draw_circle(tpl)
         for tpl in self.lines:
             self.draw_line(tpl)
-        self.all.draw(self.screen)
+        self.all.draw(self.game_area)
+        self.screen.blit(self.game_area, (MARGIN, MARGIN))
         pg.display.flip()
 
     def events(self):
@@ -95,14 +103,15 @@ class Game:
                     self.quit()
             if event.type == pg.MOUSEBUTTONUP:
                 pos = pg.mouse.get_pos()
-                new_x = int(pos[0] / TILESIZE)
-                new_y = int(pos[1] / TILESIZE)
+                new_x = int((pos[0] - MARGIN) / TILESIZE)
+                new_y = int((pos[1] - MARGIN) / TILESIZE)
                 # print("X: ", new_x)
                 # print("Y: ", new_y)
                 if self.active_player.move(new_x, new_y):
                     self.pass_turn()
             if event.type == pg.MOUSEMOTION:
                 pos = pg.mouse.get_pos()
+                pos = (pos[0] - MARGIN, pos[1] - MARGIN)
                 for am in self.av_move_sprites:
                     # repaint all circles as light
                     pg.draw.circle(am.image, self.active_player.lighter_color, (TILESIZE / 2, TILESIZE / 2), 5)

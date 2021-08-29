@@ -36,7 +36,7 @@ class CurbTile(pg.sprite.Sprite):
         self.y = y
 
     def update(self):
-        self.rect.x = self.x * TILESIZE
+        self.rect.x = self.x * TILESIZE + 1
         self.rect.y = self.y * TILESIZE
 
 # class for suggested moves
@@ -71,6 +71,8 @@ class Circle(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = game.circle_img
+        pg.transform.scale(game.circle_img.convert_alpha(),
+                           (TILESIZE, TILESIZE))
         self.size = self.image.get_size()
         self.rect = self.image.get_rect()
         self.x = x
@@ -99,6 +101,7 @@ class Player(pg.sprite.Sprite):
         # self.set_available_moves()
 
     def move(self, new_x=0, new_y=0):
+        print("move from", print_crd(self.x, self.y), "to", print_crd(new_x, new_y))
         if self.is_available_move(new_x, new_y):
             # static (non-sprite) objectrs have to be painted inside game class
             self.game.circles.append((self.color, self.x, self.y))
