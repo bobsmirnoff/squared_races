@@ -84,12 +84,14 @@ class Circle(pg.sprite.Sprite):
 
 # player car class
 class Player(pg.sprite.Sprite):
-    def __init__(self, game, color, x=0, y=0):
-        self._layer = 1
+    def __init__(self, game, name, color, x=0, y=0):
         self.groups = game.all
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
+        self.name = name
+        self.moves = 0
         self.color = color
+        self._layer = 1
         self.lighter_color = get_lighter_color(color)
         self.image_original = change_color(game.car_img, color)
         self.image = self.image_original
@@ -101,7 +103,6 @@ class Player(pg.sprite.Sprite):
         # self.set_available_moves()
 
     def move(self, new_x=0, new_y=0):
-        print("move from", print_crd(self.x, self.y), "to", print_crd(new_x, new_y))
         if self.is_available_move(new_x, new_y):
             # static (non-sprite) objectrs have to be painted inside game class
             self.game.circles.append((self.color, self.x, self.y))
