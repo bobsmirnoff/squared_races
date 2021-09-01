@@ -136,9 +136,13 @@ class Player(pg.sprite.Sprite):
     def update(self):
         self.rect.x = self.x * TILESIZE
         self.rect.y = self.y * TILESIZE
+        # print("player pos", print_crd(self.rect.x, self.rect.y))
         # align car model with current speed
         self.image = pg.transform.rotate(self.image_original,
                                          np.angle(complex(self.velocity.x, np.negative(self.velocity.y)), deg=True))
+        # reposition rotated rect
+        self.rect = self.image.get_rect()
+        self.rect.center = ((self.x + 0.5) * TILESIZE, (self.y + 0.5) * TILESIZE)
         for a in self.available_sprites:
             a.update()
 
