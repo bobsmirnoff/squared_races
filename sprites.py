@@ -171,7 +171,11 @@ class Player(pg.sprite.Sprite):
         # align car model with current speed
         self.image = pg.transform.rotate(self.image_original,
                                          np.angle(complex(self.velocity.x, np.negative(self.velocity.y)), deg=True))
+
         # TODO prevent rotated image from shrinking
+        # reposition rotated rect
+        self.rect = self.image.get_rect()
+        self.rect.center = ((self.x + 0.5) * TILESIZE, (self.y + 0.5) * TILESIZE)
         for a in self.available_sprites:
             a.update()
 
