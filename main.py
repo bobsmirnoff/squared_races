@@ -5,6 +5,7 @@ import sys
 from os import path
 from settings import *
 from map import *
+from camera import *
 from sprites import *
 
 class Game:
@@ -28,6 +29,9 @@ class Game:
         self.car_img = pg.transform.scale(pg.image.load(path.join(res_folder, CAR_IMG)).convert_alpha(),
                                           (TILESIZE, TILESIZE))
         self.map = Map(path.join(res_folder, MAP_FILE))
+        self.map = TiledMap(TMX_MAP_FILE)
+        self.map_image = self.map.make_map()
+        self.map_rect = self.map_image.get_rect()
 
     def new(self):
         self.all = pg.sprite.LayeredUpdates()
@@ -38,13 +42,13 @@ class Game:
         self.camera = Camera(self, self.map.width, self.map.height)
 
         # convert map data to map tiles
-        for row, tiles in enumerate(self.map.data):
-            for col, tile in enumerate(tiles):
-                if tile == '1':
-                    CurbTile(self, col, row)
-                elif tile == '.':
-                    RaceTile(self, col, row)
-        self.map_tiles.draw(self.game_area)
+        # for row, tiles in enumerate(self.map.data):
+        #     for col, tile in enumerate(tiles):
+        #         if tile == '1':
+        #             CurbTile(self, col, row)
+        #         elif tile == '.':
+        #             RaceTile(self, col, row)
+        # self.map_tiles.draw(self.game_area)
 
         # player color setup
         self.players.put(Player(self, 'player 1', GREEN))
@@ -93,8 +97,8 @@ class Game:
         pg.draw.line(self.game_area, BLACK, (MAP_WINDOW_WIDTH, 0), (MAP_WINDOW_WIDTH, MAP_WINDOW_HEIGHT))
 
     def draw(self):
-        # self.screen.fill(BGCOLOR)
-        self.game_area.fill(LIGHTGREY2)
+        # self.game_area.fill(LIGHTGREY2)
+        self.game_area.blit(self.camera.apply_map_img(self.map_image), self.camera.apply_rect(self.map_rect))
         # self.draw_grid()
         # for tpl in self.circles:
         #     self.draw_circle(tpl)
